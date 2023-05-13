@@ -9,6 +9,10 @@ Steps:
 6) Create 'pages' app
 ```python manage.py startapp pages```
 7) Create 'urls.py' file in 'pages' app
+8) Create templates dir in base dir with subdirs with our apps
+9) Create html files, which need to render
+10) Add in settings path to templates dir
+11) Add to urls new routes, add views with render
 
 Django tips:
 - django-admin help - список всіх команд від django
@@ -29,4 +33,9 @@ Django tips:
 ```
 path('', include('pages.urls'))
 ```
-urls.py містить список урлів, які має оброблювати та посилання на класи та функції в views.py
+urls.py містить список урлів, які має оброблювати та посилання на класи та функції в views.py 
+
+Щоб рендерити сторінку html, треба в views використати метод render:
+```
+return render(request=request, 'app_name/page_name.html')
+```
