@@ -13,6 +13,8 @@ Steps:
 9) Create html files, which need to render
 10) Add in settings path to templates dir
 11) Add to urls new routes, add views with render
+12) Create base.html з базовим дизайном html сторінки, від якого інші будуть наслідуватися
+
 
 Django tips:
 - django-admin help - список всіх команд від django
@@ -38,4 +40,47 @@ urls.py містить список урлів, які має оброблюва
 Щоб рендерити сторінку html, треба в views використати метод render:
 ```
 return render(request=request, 'app_name/page_name.html')
+```
+
+На самому початку треба розробити базові шаблони, від яких потім можна наслідувати html сторінки інших застосунків
+
+В базовому шаблоні треба визначити, де буде вставка, яку будуть реалізовувати ті, хто наслідує базовий шаблон
+```
+<body>
+    {%block content%} Тут буде те, що реалізовують шаблони {% endblock %}
+</body>
+```
+
+В шаблоні, що наслідується від базового, необхідно вказати, що це буде реалізація шаблону
+```
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Тут буде те, що доповнює саме цей шаблон</h1>
+
+{% endblock content %}
+
+```
+
+Jinja дозволяє передавати параметри з views в шаблон. Для цього треба використовувати {{}}
+```
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  <ul>
+    {% for item in items %}
+      <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+```
+
+а також передати з views.py функції параметри у метод render:
+```
+def my_view(request):
+    title = "My Title"
+    items = ["Item 1", "Item 2", "Item 3"]
+    context = {'title': title, 'items': items}
+    return render(request, 'my_template.html', context=context)
 ```
