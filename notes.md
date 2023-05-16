@@ -16,7 +16,8 @@
 12) Create base.html з базовим дизайном html сторінки, від якого інші будуть наслідуватися
 13) Add static files [some in btre dir with name static] and add to settings.py static settings. After all type: python manage.py collectstatic
 14) Add base template html code with partials files
-
+15) Add db connection, created models
+16) make migrations, migrate
 
 
 
@@ -118,3 +119,27 @@ def my_view(request):
 href={% url 'index' %}
 ```
 , де 'index' - ім'я роута
+
+
+- В кожному файлі кожного застосунку треба створити моделі.
+
+```
+class Realtor(models.Model):    
+    name = models.CharField(max_length=200)
+    photo = models.ImageField(upload_to='photos/%Y/%m/%d/')
+    description = models.TextField(blank=True)
+    phone = models.CharField(max_length=20)
+    email = models.CharField(max_length=50)
+    is_mvp = models.BooleanField(default=False)
+    hire_date = models.DateTimeField(datetime.now())
+    def __str__(self) -> str:
+        return self.name
+```
+
+
+- Щоб додати до БД моделі, треба:
+```
+python manage.py makemigration
+python manage.py sqlmigrate <app_name> 0001 (file counter in migrations/) - дає sql код
+python manage.py migrate
+```
