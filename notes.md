@@ -17,12 +17,22 @@
 13) Add static files [some in btre dir with name static] and add to settings.py static settings. After all type: python manage.py collectstatic
 14) Add base template html code with partials files
 15) Add db connection, created models
-16) make migrations, migrate
-
+16) Make migrations, migrate
+17) Create superuser 
+18) Add some content with admin area
+19) Castomize admin area for own style
+20) Pull data from models
+21) Display listings in template with jinja
+22) Make pagination
+23) Make Home/About pages
+24) Make single listing page
+25) make searching with filtering
 
 
 ### Django tips
+#### 0.
 - django-admin help - список всіх команд від django
+#### 1.
 - django-admin startproject btre . - ініціалізація проекту
 - python manage.py runserver - запустити сервер
 - https://gitignore.io - генерує за тегами
@@ -47,6 +57,7 @@ urls.py містить список урлів, які має оброблюва
 return render(request=request, 'app_name/page_name.html')
 ```
 
+#### 8.
 - На самому початку треба розробити базові шаблони, від яких потім можна наслідувати html сторінки інших застосунків.
 
 В базовому шаблоні треба визначити, де буде вставка, яку будуть реалізовувати ті, хто наслідує базовий шаблон
@@ -142,4 +153,188 @@ class Realtor(models.Model):
 python manage.py makemigration
 python manage.py sqlmigrate <app_name> 0001 (file counter in migrations/) - дає sql код
 python manage.py migrate
+```
+
+- Щоб створити superuser, треба:
+```
+python manage.py createsuperuser
+```
+
+- В admin.py ми можемо кастомізувати моделі адмінки для застосунку, тобто додати моделі в адмінку. (admin.py)
+```
+from .models import Realtor
+admin.site.register(Realtor)
+```
+
+#### 19. 
+Щоб кастомізувати адмін панель, необхідно перш за все створити шаблони html сторінок в templates директорії, наслідуватися від базового шаблону, що дає django
+Для кастомізації стилів треба створити в static/css/admin.css та окремо прописувати стилі.
+
+Щоб кастомізувати вивід інфи застосунку в адмінці, треба створити власний клас AppAdmin з наслідуванням від model.ModelAdmin.
+Далі списками треба визначити списки того, що буде відображатися в адмін панелі, а також кастомізувати саму адмін панель.
+Щоб змінити стилі адмін панелі, необхідно створити template/admin/base_site.html та розширити base/admin.html
+```
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block branding %}
+    <h1 id='head'>
+        <img src="{% static 'img/logo.png' %}" alt="BT Real Estate"
+        height="50" width="80" class="brand_img">Admin Area
+    </h1>
+{% endblock branding %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock extrastyle %}
+```
+
+```
+#header {
+    height: 50px;
+    background: #10284e;
+    color: #fff;
+}
+
+#branding h1 {
+    color: #fff;
+}
+
+.colMS > h1 {
+    color: #30caa0;
+    font-size: large;
+    font-weight: 500;
+}
+```
+
+#### 20. 
+Щоб вставляти дані з БД в фронт, треба змінити відповідну функцію обробки запиту в views.py. Також тут відразу додана пагінація, міняти треба в templates.  
+```
+def index(request):
+    listings = Listing.objects.all().order_by('-list_date').filter(is_published=True)
+    paginator = Paginator(listings, 3)
+    page_number = request.GET.get('page')
+    paged_listings = paginator.get_page(page_number)
+    context = {
+        'listings': paged_listings,
+    }
+    return render(request, 'listings/listings.html', context=context)
+```
+
+Pagination
+```
+{% if listings.has_other_pages %}
+            <ul class="pagination">
+                {% if listings.has_previous %}
+                    <li class="page-item">
+                        <a href="?page={{ listings.previous_page_number }}" class="page-link">&laquo;</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">&laquo;</a>
+                    </li>
+                {% endif %}
+
+                {% for i in listings.paginator.page_range %}
+                    {% if listings.number == i %}
+                        <li class="page-item active">
+                            <a class="page-link">{{i}}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a href="?page={{i}}" class="page-link">{{i}}</a>
+                        </li>
+                    {% endif %}
+
+                {% endfor %}
+                
+                {% if listings.has_next %}
+                    <li class="page-item">
+                        <a href="?page={{ listings.next_page_number }}" class="page-link">&raquo;</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">&laquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+            {% endif %}
+```
+
+#### 21
+Треба зробити запит з БД і передати його в функцію render(context=context)
+```
+listings = Listing.objects.all().order_by('-list_date').filter(is_published=True)
+context = {
+    "listings": listings
+}
+render(request, 'listings/listings.html, context=context)
+```
+
+#### 22
+Pagination in templates
+```
+{% if listings.has_other_pages %}
+            <ul class="pagination">
+                {% if listings.has_previous %}
+                    <li class="page-item">
+                        <a href="?page={{ listings.previous_page_number }}" class="page-link">&laquo;</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">&laquo;</a>
+                    </li>
+                {% endif %}
+
+                {% for i in listings.paginator.page_range %}
+                    {% if listings.number == i %}
+                        <li class="page-item active">
+                            <a class="page-link">{{i}}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a href="?page={{i}}" class="page-link">{{i}}</a>
+                        </li>
+                    {% endif %}
+
+                {% endfor %}
+                
+                {% if listings.has_next %}
+                    <li class="page-item">
+                        <a href="?page={{ listings.next_page_number }}" class="page-link">&raquo;</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">&laquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+            {% endif %}
+```
+
+
+
+Щоб передати фото, треба:
+```
+{{ realtor.photo.url }}
+```
+
+Фільтрування даних з БД
+listings = Listing.objects.all()
+listings = Listing.objects.all().order_by('-list_date')
+
+listings = Listing.objects.order_by('-list_date').filter(id=5) - дає тільки 5 сутність
+listings = Listing.objects.order_by('-list_date').filter(description__icontains=keywords) - опис має в собі те, що є в keywords
+listings = Listing.objects.order_by('-list_date').filter(city__iexact=city) - ігноруючи lower/upper case, знаходить по місту
+listings = Listing.objects.order_by('-list_date').filter(test_gte=60) - great than equal
+products = Product.objects.filter(Q(price__gt=50) | Q(category="Електроніка")) - поєднання двох фільтрів через логічний оператор | 
+
+
+
+
+У кожній формі з POST методом має бути csrf_token
+```
+<form action="{% url 'register' %}" method="POST">
+    {% csrf_token %}
+</form>
 ```
