@@ -16,7 +16,7 @@ from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -144,8 +144,8 @@ MESSAGE_TAGS = {
 # EMAIL SETTINGS
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'r.tasmanskiy@gmail.com'
-EMAIL_HOST_PASSWORD = '$imARGl478'
+EMAIL_HOST_USER = 'qwerty@gmail.com'
+EMAIL_HOST_PASSWORD = 'qwerty'
 EMAIL_USE_TLS = True
 
 
